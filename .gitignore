@@ -1,0 +1,11 @@
+# a1shell.c
+lshell.c
+
+# All test files
+*test*
+
+# The name file required for running the lcc on test programs
+name.nnn
+
+# .exe
+*.exe
