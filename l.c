@@ -222,7 +222,8 @@ int main(int argc,char *argv[]) {
 	// Step 3: Handle A entries
 
 	for (i = 0; i < Aindex; i++) {
-		// Code missing here. Only 1 line of code needed to handle each A entry
+		mca[Aadd[i]] = (mca[Aadd[i]] & 0xf800) |
+						((mca[Vadd[i]] + Amodadd[j] - Aadd[i] - 1) & 0xffff);
 	}
 	//================================================================
 	// Step 4: Write out executable file
