@@ -21,9 +21,9 @@ int mcaindex;					// mcaindex keeps track of what line we are currently looking 
 unsigned short start;			// start is a variable instead of a table becasue thers only 1
 int gotstart;					// this is representative of a boolean
 
-unsigned short Gadd[1000];		// G Adress Table
-char *Gptr[1000];				// G Pointer Table
-int Gindex;						// G Index - to keep track of the size
+unsigned short Gadd[1000];		// G Adress Table						- Points to global Label
+char *Gptr[1000];				// G Pointer Table						- adress of label
+int Gindex;						// G Index - to keep track of the size	- index of next avaiable slot
 
 unsigned short Eadd[1000];		// E Table
 char *Eptr[1000];
@@ -37,9 +37,9 @@ unsigned short Vadd[1000];		// V Table
 char *Vptr[1000];
 int Vindex;
 
-unsigned short Aadd[1000];		// A Table
-int Amodadd[1000];				// A Modulus Table - this is different from the other tables becuase A represents local varalbes and its slightly different
-int Aindex;
+unsigned short Aadd[1000];		// A Table		- adress of local label
+int Amodadd[1000];				// A Modulus 	- starting adress of module
+int Aindex;						// A Index		- index of next avaiable slot
 
 time_t timer;
 
@@ -72,7 +72,7 @@ int main(int argc,char *argv[]) {
 			exit(1);
 		}
 		while (1) {												// --Forming the Tables--
-			letter = fgetc(infile);
+			letter = fgetc(infile);								// read first character of next line
 			if (letter == 'C')									// C - Completeness : This the end of a header
 				break;
 			else if (letter == 'S')	{							// S - Calculates the start location of the file
@@ -110,11 +110,11 @@ int main(int argc,char *argv[]) {
 			} else
 			// The code for each of these tables will be similar
 			if (letter == 'E') {								// E -
-				if (fread(&addr, 2, 1, infile) != 1) {		// Formatting ?
+				if (fread(&addr, 2, 1, infile) != 1) {		// Format Check
 					printf("Invalid E entry\n");
 					exit(1);
 				}
-				Eadd[Eindex] = addr + mcaindex; 				
+				Eadd[Eindex] = addr + mcaindex;
 				j = 0;
 				do {                              			// Get label		
 					letter = fgetc(infile);
@@ -122,31 +122,36 @@ int main(int argc,char *argv[]) {
 				} while (letter != '\0');
 				Eptr[Eindex++] = strdup(buf);   			// Add label
 			} else if (letter == 'e') {							// e -
-				if (fread(&addr, 2, 1, infile) != 1) {		// Formatting ?
+				if (fread(&addr, 2, 1, infile) != 1) {		
 					printf("Invalid e entry\n");
 					exit(1);
 				}
 				eadd[eindex] = addr + mcaindex; 				
 				j = 0;
-				do {                              			// Get label		
+				do {                              					
 					letter = fgetc(infile);
 					buf[j++] = letter;
 				} while (letter != '\0');
-				eptr[eindex++] = strdup(buf);   			// Add label
+				eptr[eindex++] = strdup(buf);   			
 			} else if (letter == 'V') {							// V -
-				if (fread(&addr, 2, 1, infile) != 1) {		// Formatting ?
+				if (fread(&addr, 2, 1, infile) != 1) {		
 					printf("Invalid V entry\n");
 					exit(1);
 				}
 				Vadd[Vindex] = addr + mcaindex; 				
 				j = 0;
-				do {                              			// Get label		
+				do {                              					
 					letter = fgetc(infile);
 					buf[j++] = letter;
 				} while (letter != '\0');
-				Vptr[Vindex++] = strdup(buf);   			// Add label
+				Vptr[Vindex++] = strdup(buf);   			
 			} else if (letter == 'A') {							// A is Different!
-				// code missing here
+				if (fread(&addr, 2, 1, infile) != 1) {		// Format Check
+					printf("Invalid A entry\n");
+					exit(1);
+				}
+				Aadd[Aindex] = addr + mcaindex;				// adjusted address
+				Amodadd[Aindex++] = mcaindex;				// startign adress of the module
 			} else {
 				printf("Invalid header entry %c in %s\n", letter, argv[i]);
 				exit(1);
