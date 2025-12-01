@@ -254,11 +254,17 @@ int main(int argc,char *argv[]) {
 	for (i = 0; i < Vindex; i++) {
 		//  Code missing here:
 		//  Write out V entries as A entries.
+		fwrite("A", 1, 1, outfile);
+		fwrite(Vadd + i, 2, 1, outfile);
+		fprintf(outfile, "%s", Vptr[i]);
+		fwrite("", 1, 1, outfile);
 	}
 	// Write out A entries
 	for (i = 0; i < Aindex; i++) {                        
-		// Code missing here:
-		// Write out A entries.
+		fwrite("A", 1, 1, outfile);
+		fwrite(Aadd + i, 2, 1, outfile);
+		fprintf(outfile, "%s", Amodadd[i]);
+		fwrite("", 1, 1, outfile);
 	}
 	// Terminate header
 	fwrite("C", 1, 1, outfile);
