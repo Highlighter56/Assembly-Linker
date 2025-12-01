@@ -192,12 +192,30 @@ int main(int argc,char *argv[]) {
 	// Add code snipets are similar, just need to adjust the variables and the mask for different pcoffset sizes  
 	// handle e entries
 	for (i = 0; i < eindex; i++) {
-		// code missing here
+		for (j = 0; j < Gindex; j++) {
+			if(!strcmp(eptr[i], Gptr[j]))
+				break;
+			}
+		if (j >= eindex) {
+			printf("%s is an undefined external reference", eptr[i]);
+			exit(1);
+		}
+		mca[eadd[i]] = (mca[eadd[i]] & 0xf800) |
+						((mca[eadd[i]] + Gadd[j] - eadd[i] - 1) & 0x1ff);
 	}
 
-	// handle V entries
+	// handle V entries								-- This may be wrong because V is all 16 bits
 	for (i = 0; i < Vindex; i++) {
-		// code missing here
+		for (j = 0; j < Gindex; j++) {
+			if(!strcmp(Vptr[i], Gptr[j]))
+				break;
+			}
+		if (j >= Gindex) {
+			printf("%s is an undefined external reference", Vptr[i]);
+			exit(1);
+		}
+		mca[Vadd[i]] = (mca[Vadd[i]] & 0xf800) |
+						((mca[Vadd[i]] + Gadd[j] - Vadd[i] - 1) & 0xffff);
 	}
 
 	//================================================================
