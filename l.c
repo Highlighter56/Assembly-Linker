@@ -166,12 +166,27 @@ int main(int argc,char *argv[]) {
 		fclose(infile);
 	}
 
-	// Code that Professor recomended to implement for checking purposes, before moving on to step 2
-	// Check page 168 in textbook for an example of what were printing  
-	// Possibly add manual prints for the tables
-	for(i=0; i<mcaindex; i++) {
-		printf("%04x\t%04x\t", i, mca[i]);
-	}
+	// =====Debugging=====
+	// printf("MCA\n");
+	// for(i=0; i<mcaindex; i++) {
+	// 	printf("%04x\t%04x\t\n", i, mca[i]);
+	// }
+	// printf("G Table\n");
+	// for(i=0; i<Gindex; i++) {
+	// 	printf("%04x\t%s\t%04x\n", i, Gptr[i], Gadd[i]);
+	// }
+	// printf("e Table\n");
+	// for(i=0; i<eindex; i++) {
+	// 	printf("%04x\t%s\t%04x\n", i, eptr[i], eadd[i]);
+	// }
+	// printf("E Table\n");
+	// for(i=0; i<Eindex; i++) {
+	// 	printf("%04x\t%s\t%04x\n", i, Eptr[i], Eadd[i]);
+	// }
+	// printf("V Table\n");
+	// for(i=0; i<Vindex; i++) {
+	// 	printf("%04x\t%s\t%04x\n", i, Vptr[i], Vadd[i]);
+	// }
 
 	//================================================================
 	// Step 2: Adjust external references
@@ -183,47 +198,47 @@ int main(int argc,char *argv[]) {
 				break;
 			}
 		if (j >= Gindex) {
-			printf("%s is an undefined external reference", Eptr[i]);
+			printf("%s is an undefined external E reference", Eptr[i]);
 			exit(1);
 		}
-		mca[Eadd[i]] = (mca[Eadd[i]] & 0xf800) |
-						((mca[Eadd[i]] + Gadd[j] - Eadd[i] - 1) & 0x7ff);
+		mca[Eadd[i]] = (mca[Eadd[i]] & 0xf800) |							// 	|
+						((mca[Eadd[i]] + Gadd[j] - Eadd[i] - 1) & 0x7ff);	//	| The two masks cover the oposite ends
 	}
 	// Add code snipets are similar, just need to adjust the variables and the mask for different pcoffset sizes  
 	// handle e entries
 	for (i = 0; i < eindex; i++) {
+		// printf("%s\n",eptr[i]);			// debugging
 		for (j = 0; j < Gindex; j++) {
-			if(!strcmp(eptr[i], Gptr[j]))
+			// printf("\t%s\n",Gptr[j]);		// debugging
+			if(!strcmp(eptr[i], Gptr[j]))									// Checks for matches from the e to G table
 				break;
 			}
-		if (j >= eindex) {
-			printf("%s is an undefined external reference", eptr[i]);
+		if (j >= Gindex) {
+			printf("%s is an undefined external e reference", eptr[i]);
 			exit(1);
 		}
-		mca[eadd[i]] = (mca[eadd[i]] & 0xf800) |
-						((mca[eadd[i]] + Gadd[j] - eadd[i] - 1) & 0x1ff);
+		mca[eadd[i]] = (mca[eadd[i]] & 0xfe00) |							// |
+						((mca[eadd[i]] + Gadd[j] - eadd[i] - 1) & 0x1ff);	// | The two masks cover oposite ends
 	}
 
-	// handle V entries								-- This may be wrong because V is all 16 bits
+	// handle V entries								
 	for (i = 0; i < Vindex; i++) {
 		for (j = 0; j < Gindex; j++) {
 			if(!strcmp(Vptr[i], Gptr[j]))
 				break;
 			}
 		if (j >= Gindex) {
-			printf("%s is an undefined external reference", Vptr[i]);
+			printf("%s is an undefined external V reference", Vptr[i]);
 			exit(1);
 		}
-		mca[Vadd[i]] = (mca[Vadd[i]] & 0xf800) |
-						((mca[Vadd[i]] + Gadd[j] - Vadd[i] - 1) & 0xffff);
+		mca[Vadd[i]] = (mca[Vadd[i]] + Gadd[j] - Vadd[i] - 1) & 0xffff;		// 16 bit, so no first mask
 	}
 
 	//================================================================
 	// Step 3: Handle A entries
 
 	for (i = 0; i < Aindex; i++) {
-		mca[Aadd[i]] = (mca[Aadd[i]] & 0xf800) |
-						((mca[Vadd[i]] + Amodadd[j] - Aadd[i] - 1) & 0xffff);
+		mca[Aadd[i]] = (mca[Vadd[i]] + Amodadd[j] - Aadd[i] - 1) & 0xffff;	// 16 bit, so no first mask
 	}
 	//================================================================
 	// Step 4: Write out executable file
