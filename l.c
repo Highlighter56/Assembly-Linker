@@ -33,13 +33,13 @@ unsigned short eadd[1000];		// e Table
 char * eptr[1000];
 int eindex;
 
-unsigned short Aadd[1000];		// A Table
-int Amodadd[1000];				// A Modulus Table - this is different from the other tables becuase A represents local varalbes and its slightly different
-int Aindex;
-
 unsigned short Vadd[1000];		// V Table
 char *Vptr[1000];
 int Vindex;
+
+unsigned short Aadd[1000];		// A Table
+int Amodadd[1000];				// A Modulus Table - this is different from the other tables becuase A represents local varalbes and its slightly different
+int Aindex;
 
 time_t timer;
 
@@ -71,13 +71,12 @@ int main(int argc,char *argv[]) {
 			printf("Not a linkable file\n");
 			exit(1);
 		}
-		while (1) {
+		while (1) {												// --Forming the Tables--
 			letter = fgetc(infile);
 			if (letter == 'C')									// C - Completeness : This the end of a header
 				break;
-			else
-				if (letter == 'S')	{							// S - Calculates the start location of the file
-					if (fread(&addr, 2, 1, infile) != 1) {		// addr unsigned short
+			else if (letter == 'S')	{							// S - Calculates the start location of the file
+					if (fread(&addr, 2, 1, infile) != 1) {
 						printf("Invalid S entry\n");
 						exit(1);
 					}
@@ -107,15 +106,45 @@ int main(int argc,char *argv[]) {
 						j++;
 					}
 				}
-				Gptr[Gindex++] = strdup(buf);   				// save string
+				Gptr[Gindex++] = strdup(buf);   				// store the label in the g table
 			} else
 			// The code for each of these tables will be similar
 			if (letter == 'E') {								// E -
-				// code missing here
+				if (fread(&addr, 2, 1, infile) != 1) {		// Formatting ?
+					printf("Invalid E entry\n");
+					exit(1);
+				}
+				Eadd[Eindex] = addr + mcaindex; 				
+				j = 0;
+				do {                              			// Get label		
+					letter = fgetc(infile);
+					buf[j++] = letter;
+				} while (letter != '\0');
+				Eptr[Eindex++] = strdup(buf);   			// Add label
 			} else if (letter == 'e') {							// e -
-				// code missing here
+				if (fread(&addr, 2, 1, infile) != 1) {		// Formatting ?
+					printf("Invalid e entry\n");
+					exit(1);
+				}
+				eadd[eindex] = addr + mcaindex; 				
+				j = 0;
+				do {                              			// Get label		
+					letter = fgetc(infile);
+					buf[j++] = letter;
+				} while (letter != '\0');
+				eptr[eindex++] = strdup(buf);   			// Add label
 			} else if (letter == 'V') {							// V -
-				// code missing here
+				if (fread(&addr, 2, 1, infile) != 1) {		// Formatting ?
+					printf("Invalid V entry\n");
+					exit(1);
+				}
+				Vadd[Vindex] = addr + mcaindex; 				
+				j = 0;
+				do {                              			// Get label		
+					letter = fgetc(infile);
+					buf[j++] = letter;
+				} while (letter != '\0');
+				Vptr[Vindex++] = strdup(buf);   			// Add label
 			} else if (letter == 'A') {							// A is Different!
 				// code missing here
 			} else {
