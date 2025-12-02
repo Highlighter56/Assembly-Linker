@@ -9,3 +9,6 @@ name.nnn
 
 # .exe
 *.exe
+
+# .txt
+*.txt

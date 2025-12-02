@@ -187,6 +187,10 @@ int main(int argc,char *argv[]) {
 	// for(i=0; i<Vindex; i++) {
 	// 	printf("%04x\t%s\t%04x\n", i, Vptr[i], Vadd[i]);
 	// }
+	// printf("A Table\n");
+	// for(i=0; i<Aindex; i++) {
+	// 	printf("%04x\t%04x\n", i, Aadd[i]);
+	// }
 
 	//================================================================
 	// Step 2: Adjust external references
@@ -231,8 +235,8 @@ int main(int argc,char *argv[]) {
 			printf("%s is an undefined external V reference", Vptr[i]);
 			exit(1);
 		}
-		// mca[Vadd[i]] = (mca[Vadd[i]] + Gadd[j] - Vadd[i] - 1) & 0xffff;		// 16 bit, so no first mask
-		mca[Vadd[i]] = (mca[Vadd[i]] | Gadd[j]) & 0xffff;							// 16 bit, so no first mask
+		// mca[Vadd[i]] = mca[Vadd[i]] + Gadd[j] - Vadd[i] - 1;
+		mca[Vadd[i]] = mca[Vadd[i]]+ Gadd[j];
 	}
 
 	//================================================================
@@ -243,14 +247,14 @@ int main(int argc,char *argv[]) {
 	}
 	//================================================================
 	// Step 4: Write out executable file
-
+	
 	outfile = fopen("link.e", "wb");
 	if (!outfile) {
 		printf("Cannot open output file link.e\n");
 		exit(1);
 	}
 
-	// printf("o\n");
+
 	// Write out file signature
 	fwrite("o", 1, 1, outfile);
 	
@@ -260,7 +264,6 @@ int main(int argc,char *argv[]) {
 		fwrite("S", 1, 1, outfile);
 		fwrite(&start, 2, 1, outfile);
 	}
-	// printf("G\n");
 	// Write out G entries
 	for (i = 0; i < Gindex; i++) {
 		fwrite("G", 1, 1, outfile);
@@ -268,27 +271,18 @@ int main(int argc,char *argv[]) {
 		fprintf(outfile, "%s", Gptr[i]);
 		fwrite("", 1, 1, outfile);
 	}
-	// printf("V\n");
 	// Write out V entries as A entries
 	for (i = 0; i < Vindex; i++) {
 		fwrite("A", 1, 1, outfile);
 		fwrite(Vadd + i, 2, 1, outfile);
-		// fprintf(outfile, "%s", Vptr[i]);
-		// fwrite("", 1, 1, outfile);
 	}
-	// printf("A\n");
 	// Write out A entries
 	for (i = 0; i < Aindex; i++) {
 		fwrite("A", 1, 1, outfile);
 		fwrite(Aadd + i, 2, 1, outfile);
-		// fwrite(Amodadd + i, 2, 1, outfile);
-		// fwrite("", 1, 1, outfile);
 	}
-	// printf("C\n");
 	// Terminate header
 	fwrite("C", 1, 1, outfile);
-
-	// printf("code\n");
 	// Write out code
 	for (i = 0; i < mcaindex; i++) {
 		fwrite(mca + i, 2, 1, outfile);
